@@ -1,0 +1,167 @@
+
+
+
+
+    ################################################## multiboot (pre-beta)
+
+    
+    wget -O /bin/rpi-multiboot.sh https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/setup/rpi-multiboot.sh
+
+    rpi-multiboot.sh init
+    reboot
+
+    #check the partitions were created ok> blkid
+
+    https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz
+    rpi-multiboot.sh install /usbstick/snapshot.tar.gz os2
+
+    rpi-multiboot.sh toggle os2
+    reboot
+
+
+    NOTE: very buggy beta stage... edit /boot/config.txt comment out all os_prefix= and reboot to return to baseOS
+
+
+
+
+
+
+    MULTIBOOT: (draft)
+    ####################################################################
+
+        multiboot allows the running/toggling of 3
+        additional "operating systems"
+
+        initially 2 within mmc and 1 on usb/other
+        (NOTE:usb partition is via manual install only / sketchy / no support -> WIP ignore:os3)
+
+
+        initially this feature will be a superset
+        of the base image... what this means;
+
+            -base flashing via luci can only be done
+             from the base-image
+            -this will wipe out all mmc data
+             which includes your multi-os's
+             and the usb-os's boot data
+
+            -multi flashing is performed from either
+             the base or multi-os via custom script
+
+            -the idea is that adopters of the "multi"
+             featureset retain whatever base version
+             is initially flashed... and use the
+             multi "slots" for newer installs /
+             install toggling ( multiA <> multiB <> 
+             multiC etc. )
+
+
+        config "mirroring/export" initially, will
+        support a one time "here to new" auto
+        import... with possibly a future X > Y
+        option... via a script... otherwise
+        you'll have to export / import
+        manually
+
+        initially much of the builds automation
+        features such as persistent statitics
+        package-autorestore etc. etc. will
+        be broken within each multi-os...
+        (edit: initial config move works well)
+        so this feature is more suitable to
+        those who test alot, run cutting edge
+        need to run from usb, for those who are
+        comfortable with manual import/export
+        of os settings or if you really need
+        to multiboot another OS type at the
+        same time as OpenWrt...
+
+
+
+        requirements:
+        
+            -4GB+sdcard
+            -likely this builds stock partition layout
+
+
+
+        initial contraints:
+            
+            -each "multi>rootfs" partition is hardcoded
+             at 1GB... although this is to streamline
+             auto setup and not an actual hard limitation
+
+            -sadly due to github file size contraints (50M) os images
+             for raspiOS64 etc. cannot be uploaded for ease of
+             install... you'll have to get by manually for larger
+             OS's... and best to stay with 64 only for now...
+
+
+
+        possible extensions:
+            
+            -migrate SLOTA > SLOTB etc. etc. ( as opposed to install )
+
+            -revert SLOTA <-"SLOTA-LAST" ( or similar "rollback that slot" )
+
+
+
+
+
+
+    
+
+
+
+    ############################################ ignore below
+    
+    
+    MULTIBOOT(not)>SDEXPAND: (draft)
+
+        the addition of multiboot featureset has allowed
+        for a one time sdcard rootfspartition extend
+        operation...
+
+        this will allow you to utilise the full
+        space quotient of your sd;
+
+            i.e.: 900MB > 14GB
+
+
+        technically i'd only really advise such an
+        option for official releases / long term
+        installs of which you need that full
+        space and are unable to use extroot
+        ( i.e. all usb port are taken )
+
+
+        may need to
+        use -p on next sysupgrade to revert
+        back to the original layout
+        and re-extend ( not sure about this )
+
+
+
+
+
+    MULTIBOOT(not)>RAMFSMODE: (draft)
+
+        the addition of multiboot featureset has allowed
+        for implementation of a ramfs mode into which
+        an exported backup from a persistent install
+        will be loaded...
+
+        not sure yet whether to offer once off toggles
+        / reboot from persistent os... or repeated
+        loading into ramfs... or both... likely just
+        start with once off and see how it goes...
+
+
+
+
+
+
+
+
+
+
