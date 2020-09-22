@@ -358,6 +358,13 @@ initbootOS() { #v1<setup.sh > v1.5 'boot+init' means setup a folder on /boot/osX
     local OSbase="/boot"
 
 
+
+    echo "OSrootfspart: $OSrootfspart"
+
+
+
+
+
     if [ ! -d "$OSbase" ]; then echo "OSbase: $OSbase/ [notpresent->exit 1]"; exit 1; fi
     if [ -d "$OSbase/$OSdir" ]; then echo "OSdir: $OSbase/$OSdir exists return 0"; return 0; fi
 
@@ -398,7 +405,7 @@ sleep ${dbgslp:-0}
 
 
         echo "addtesting-nextos os0 > os1"; sleep 1
-        sed -i 's!$! nextos=os1!g' cmdline.txt "$OSbase/$OSdir/cmdline.txt"
+        sed -i 's!$! nextos=os1!g' "$OSbase/$OSdir/cmdline.txt"
 
 
         echo "Create $OSbase/$OSdir/cmdline.txt.multi [for sysup repairs]"
@@ -410,17 +417,25 @@ sleep ${dbgslp:-0}
 
 
     else
-	    echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir" > "$OSbase/$OSdir/cmdline.txt"
+
+
+        echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir" > "$OSbase/$OSdir/cmdline.txt"
 
 
         echo "cmdline.txt rootfs=${OSrootfspart} $OSbase/$OSdir/cmdline.txt"
         sleep 2
+        echo "############ checkit...pre"; sleep 2
+		awk -F 'rootfs=' '{printf $2}' $OSbase/$OSdir/cmdline.txt
 
         sed -i "s!rootfs=/dev/mmcblk0p2!rootfs=${OSrootfspart}!g" "$OSbase/$OSdir/cmdline.txt"; sedRET=$?
         echo "sedret: $sedRET"; sleep 1
 
 
+        echo "############ checkit...post"; sleep 2
+		awk -F 'rootfs=' '{printf $2}' $OSbase/$OSdir/cmdline.txt
 
+
+		sleep 5
 
 
 
@@ -429,11 +444,18 @@ sleep ${dbgslp:-0}
         case "$OSdir" in
             *os1*)
                 echo "addtesting-nextos os1 > os2"; sleep 1
-                sed -i 's!$! nextos=os2!g' cmdline.txt "$OSbase/$OSdir/cmdline.txt"
+                sed -i 's!$! nextos=os2!g' "$OSbase/$OSdir/cmdline.txt"
+
+
+                echo "isvalid workaround early"
+                echo 'isvalid=1' >> "$OSbase/$OSdir/os.ini"
             ;;
             *os2*)
                 echo "addtesting-nextos os2 > os1"; sleep 1
-                sed -i 's!$! nextos=os1!g' cmdline.txt "$OSbase/$OSdir/cmdline.txt"
+                sed -i 's!$! nextos=os1!g' "$OSbase/$OSdir/cmdline.txt"
+
+                echo "isvalid workaround early"
+                echo 'isvalid=1' >> "$OSbase/$OSdir/os.ini"
             ;;
 
             *)
@@ -618,13 +640,22 @@ mmcpartcount=$(blkid | grep '^/dev/mmcblk0' | wc -l)
 
 
 
+
+
+
+
+
 if [ -f /boot/multiboot.ini ]; then #DEBUG=1
     echU "multiboot.ini[load]"
     . /boot/multiboot.ini
 else
-    echU "multiboot.ini [nope] @ VANILLA=1"
-    VANILLA=1
+    echU "multiboot.ini [nope] @ VANILLA=1 [wip]"
+    #VANILLA=1 #OFF@0925>unpolated->fresh-os@info
 fi #VANILLA@initsACTIONcaseexit #@@@~if VANILLA &&|| POPULATE >>> INSTALLSLOT="os1 os2"
+
+
+
+
 
 
 
@@ -646,16 +677,8 @@ fi
 
 
 
-
-
 #awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g'
-
-
-
 #awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g' | while read... grep isvalid=1 /boot/.../os.ini
-
-
-
 
 
 
@@ -1404,6 +1427,8 @@ if [ ! -z "$DOTOGGLE" ]; then
 
     fi
 
+
+
 	#echo "DBG: setconfigval \"/boot/config.txt\" add \"os_prefix=$toggleOSto\""
 	#ADDHASBUG@#>>>added enable setconfigval "/boot/config.txt" add "os_prefix=$toggleOSto"
     if [ -z "$toggleOSto" ] || [ "$toggleOSto" = "os99" ] || [ "$toggleOSto" = "off" ]; then
@@ -1498,6 +1523,7 @@ cp /boot/config.txt /boot/config.txt.default #initiallyoffbutcanbeswitchedtoyour
     initbootOS "os1" "/dev/mmcblk0p3"
     initbootOS "os2" "/dev/mmcblk0p4"
     initbootOS "os3" "$sdROOTFS" #ASKFIRST@>conditional?<ini-installed_os? #sdROOTFS="/dev/sda2"
+
 
 
 
@@ -1929,10 +1955,10 @@ rpi_get_rootfspart() {
 
 case "$1" in
 	os1)
-	echo "/dev/mmcblk0p3"
+	    echo "/dev/mmcblk0p3"
 	;;
 	os2)
-	echo "/dev/mmcblk0p4"
+	    echo "/dev/mmcblk0p4"
 	;;
 	os3)
 		echo "/dev/sda6"
@@ -2232,22 +2258,10 @@ if [ ! -z "$DOINFO" ]; then #DOINFO=1
         echo "DISK: $DISK [set-early]"; sleep 3
     fi
 
-
-    blkPARTSmmcnum=$(blkidmulti "mmcnum")
-    blkPARTSmmcUUIDnum=$(blkidmulti "mmcuuidnum")
-    #blkPARTSmmcnum=$(blkid | grep "^$DISK" | wc -l)
-    #blkPARTSmmcUUIDnum=$(blkid | grep "^$DISK" | grep ' UUID=' | wc -l)
-
-
-
+    blkPARTSmmcnum=$(blkidmulti "mmcnum") #######blkPARTSmmcnum=$(blkid | grep "^$DISK" | wc -l)
+    blkPARTSmmcUUIDnum=$(blkidmulti "mmcuuidnum") ########blkPARTSmmcUUIDnum=$(blkid | grep "^$DISK" | grep ' UUID=' | wc -l)
     osPFXsetCNT=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix' | wc -l)
     osPFXoffCNT=$(cat /boot/config.txt 2>/dev/null | grep '#os_prefix' | wc -l)
-
-
-
-
-    echo "       blkmmccnt: $blkPARTSmmcnum"
-    echo "     blkmmcfscnt: $blkPARTSmmcUUIDnum"
 
     if [ "$blkPARTSmmcnum" -eq 2 ] && [ "$blkPARTSmmcUUIDnum" -eq 2 ]; then
         blkPARTSstock=1
@@ -2255,14 +2269,17 @@ if [ ! -z "$DOINFO" ]; then #DOINFO=1
 
 
 
+    #0925>tmpoff
+    #echo "       blkmmccnt: $blkPARTSmmcnum"
+    #echo "     blkmmcfscnt: $blkPARTSmmcUUIDnum"
+    #echo "################################################### disk-to-os-detect-tests"
+    #blkidmulti "labels" | grep -E '(^os|rootfs|boot)'
 
 
-    echo "################################################### disk-to-os-detect-tests"
-    blkidmulti "labels"
+
 
 
     if [ -f /boot/.initialize ] && [ ! -z "$blkPARTSstock" ]; then
-
         echo "################################################### INITIALIZE stage2"
         #if blkPARTSmmcUUIDnum 4 ok 2 reboot or issues...
         echo ""
@@ -2271,7 +2288,8 @@ if [ ! -z "$DOINFO" ]; then #DOINFO=1
     elif [ -f /boot/.initialize ] && [ -z "$blkPARTSstock" ]; then
         echo ".initialize remove or partition issues"
     elif [ ! -f /boot/.initialize ] && [ "$blkPARTSmmcUUIDnum" -eq 4 ]; then
-        echo "################################################### INITIALIZE completed"
+        #echo "################################################### INITIALIZE completed"
+        echo "################################################### [setup]"
     else
         echo "likely partition issues"
         :
@@ -2282,21 +2300,17 @@ if [ ! -z "$DOINFO" ]; then #DOINFO=1
 
 
 
-
-
-
-
-
-
-
-
-
-    echo "################################################### INFO"
-
-    echo "### config.txt: os_prefix"
+    echo "################################################### INFO" #echo "### config.txt: os_prefix"
     #osPFXsetCNT=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix' | wc -l)
     if [ "$osPFXsetCNT" -eq 1 ]; then
-        cat /boot/config.txt 2>/dev/null | grep '^os_prefix'
+
+        cursetpfx=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix')
+        if ! grep -q "$cursetpfx" /proc/cmdline; then
+            echo "$cursetpfx [reboot-pending]"
+        else
+            echo "$cursetpfx [current]"
+        fi
+
     elif [ "$osPFXsetCNT" -gt 1 ]; then
         echo "WARNING: /boot/config.txt os_prefix > multiple enabled entries"
         cat /boot/config.txt 2>/dev/null | grep '^os_prefix'
@@ -2321,7 +2335,6 @@ if [ ! -z "$DOINFO" ]; then #DOINFO=1
 
 
 
-
     echo -n "################################################### /boot/multiboot.ini"
     if [ -f /boot/multiboot.ini ]; then
         echo " [ok]"
@@ -2339,21 +2352,36 @@ if [ ! -z "$DOINFO" ]; then #DOINFO=1
 
 
 
+
     validaterootfsparts() {
 
     #MANUAL CHECKING OF -b &&|| root=@slot/cmdline.txt -> slot/os.ini<isvalid=1 isvalid=1===dontverifyblockdev/prechecked (i.e. usb)
 
         find /boot | grep '/cmdline.txt$' | while read THIS; do
+			osrootfsdev=
             dirTHIS=$(dirname $THIS)
             #echo -n "$THIS"
             echo -n "$dirTHIS"
 
             if [ "$dirTHIS" = "/boot" ]; then
                 echo " [baseos]"
+            elif [ "$dirTHIS" = "/boot/os0" ]; then
+                echo " [ramfs]"
             elif grep -q '^isvalid=1' $(dirname $THIS)/os.ini; then #2>/dev/null
-                echo " [valid]"
+
+                #echo "awk -F 'rootfs=' '{printf $2}' $(dirname $THIS)/cmdline.txt"
+                #osrootfsdev=$(awk -F 'root=' '{printf $2}' $(dirname $THIS)/cmdline.txt)
+                osrootfsdev=$(awk -F 'root=' '{printf $2}' $(dirname $THIS)/cmdline.txt | cut -d' ' -f1)
+                echo " [valid] $osrootfsdev"
+                #echo $(dirname $THIS)/cmdline.txt
+
+
+				#awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g'
+
+
+
             else
-                echo " [invalid]"
+                echo " [blank]" #echo " [invalid]"
             fi
             which usleep &>/dev/null && usleep 70000 #sleep 1
         done
