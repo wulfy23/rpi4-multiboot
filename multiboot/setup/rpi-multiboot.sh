@@ -1,6 +1,14 @@
 #!/bin/sh
 #^notreally@curl sh
 #echo "THIS IS A TESTING NON FUNCTIONAL SCRIPT"; exit 0
+#https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz
+#https://raw.githubusercontent.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz
+#echo "https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz"
+#echo "$gRbasep/$GmbSUB/current/openwrt/snapshot.tar.gz"
+#https://raw.githubusercontent.com/wulfy23/rpi4-multiboot/master/multiboot/setup/rpi-multiboot.sh
+#exit 0
+#gRurepo="wulfy23/rpi4"; GmbSUB="builds/multiboot"
+
 
 #v1 RAMFSv="/etc/custom/4-model-b/ramfs"
 #v2 setinline<@>>>init RAMFSout="/etc/custom/4-model-b/ramfs" #v2@@@?ini?@@@outLIVE???
@@ -9,31 +17,150 @@
 
 
 
+
+
+
+
+
+
+#######
+#blkid | sed -n '/dev\/mmcblk0p2/s/.*\ PARTUUID=\"\([^\"]*\)\".*/\1/p'
+#sed -i -e "s|PARTUUID=$FSTAB_CMD|/dev/mapper/sdcard|g" /etc/fstab
+########
+#sed -i '$s/$/ cryptdevice=\/dev\/mmcblk0p2:sdcard/' /boot/cmdline.txt
+########
+#ROOT_CMD="$(sed -n 's|^.*root=\(\S\+\)\s.*|\1|p' /boot/cmdline.txt)"
+#sed -i -e "s|$ROOT_CMD|/dev/mapper/sdcard|g" /boot/cmdline.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+#@??? . /lib/functions.sh . /lib/upgrade/common.shNOPE> # dependencies :>>> mount-utils partx-utils <<< block-mount fdisk
+#if mountpoint -q /tmp/rootfs ; then
+#[root@dca632 /usbstick 42°]# mountpoint -d /boot #179:1
+#[root@dca632 /usbstick 42°]# mountpoint -x /dev!
+#[root@dca632 /usbstick 41°]# cat /usr/lib/opkg/info/mount-utils.list
+#/usr/bin/mountpoint
+#/usr/bin/mount
+#/usr/bin/umount
+#/usr/bin/findmnt
+
+
+
+
+testrootfsvianoncmdline() {
+
+    mountpoint -d /
+    grep $(mountpoint -d /) /proc/1/mountinfo
+
+}
+
+
+
+
+#cat $(find /proc/ | grep mountinfo | grep -v '/task') #allsame
+
+#findmnt -n -S UUID=ff313567-e9f1-5a5d-9895-3ba130b4a864
+#[root@dca632 /usbstick 41°]# findmnt / ##### #findmnt -A -r
+#TARGET SOURCE         FSTYPE OPTIONS #/      /dev/mmcblk0p2 ext4   rw,noatime
+# -n, --noheadings       don't print column headings
+#-P = format
+# -S, --source <string>  the device to mount (by name, maj:min,
+#                          LABEL=, UUID=, PARTUUID=, PARTLABEL=)
+#                           -T, --target <path>    the path to the filesystem to use
+###########################################################################################################3
+#proc mountinfo
+#find /sys/devices/platform | grep block | grep uevent
+#find /sys/devices/platform | grep block | grep 'dev$'
+###########
+#/sys/devices/platform/emmc2bus/fe340000.emmc2/mmc_host/mmc0/mmc0:aaaa/block/mmcblk0/uevent:MAJOR=179
+#/sys/devices/platform/emmc2bus/fe340000.emmc2/mmc_host/mmc0/mmc0:aaaa/block/mmcblk0/dev:179:0
+#/sys/devices/platform/emmc2bus/fe340000.emmc2/mmc_host/mmc0/mmc0:aaaa/block/mmcblk0/mmcblk0p1/uevent:MAJOR=179
+#/sys/devices/platform/emmc2bus/fe340000.emmc2/mmc_host/mmc0/mmc0:aaaa/block/mmcblk0/mmcblk0p1/dev:179:1
+#/sys/devices/platform/emmc2bus/fe340000.emmc2/mmc_host/mmc0/mmc0:aaaa/block/mmcblk0/mmcblk0p2/uevent:MAJOR=179
+#/sys/devices/platform/emmc2bus/fe340000.emmc2/mmc_host/mmc0/mmc0:aaaa/block/mmcblk0/mmcblk0p2/dev:179:2
+
+
+
+
+
+
+
+
+
+
+
+
+PREREQ="fdisk blkid" #PREREQ="grep cut sed parted fdisk findmnt partprobe"
+
+
+
+
+
+
+
+
+
+
+#note: technically *ramfs.sh* are special.bin only? > 70%logic used here too
+######################## handle updated files from refresh back into normal fs || >>> . /boot ???
+if [ -f /boot/ramfs.func.sh ] && [ ! -f /etc/custom/ramfs/ramfs.func.sh ]; then
+    echo "Updating: /etc/custom/ramfs/ramfs.func.sh"; sleep 1
+    mkdir -p /etc/custom/ramfs/
+    cp /boot/ramfs.func.sh /etc/custom/ramfs/ramfs.func.sh
+
+elif [ -f /boot/ramfs.func.sh ] && [ -f /etc/custom/ramfs/ramfs.func.sh ]; then
+    if cmp -s /boot/ramfs.func.sh /etc/custom/ramfs/ramfs.func.sh; then
+        : #echo "cmp -s /boot/ramfs.func.sh /etc/custom/ramfs/ramfs.func.sh = 0"
+    else
+        echo "Updatingnewer: /etc/custom/ramfs/ramfs.func.sh"; sleep 1
+        echo "cmp -s /boot/ramfs.func.sh /etc/custom/ramfs/ramfs.func.sh = 1"
+        #cp -f /boot/ramfs.func.sh /etc/custom/ramfs/ramfs.func.sh
+    fi
+else
+    #!getsthisscript echo ">>> please run rpi-multi.sh-getfiles to download core files"
+    #ISREALLYVANILLA=1
+    #$0 init; exit 0
+
+    #if [ "$1" != "init" ]; then
+    #    echo "running >>> $0 init"
+    #    $0 init
+    #    exit 0
+    #else
+        echo "no-core-files>>> $0 init"
+        #exit 0
+    #fi
+
+fi
+
+
+
+
+
+Dupd="$(date +%Y%M%d)" #@early repocheckFF
+
+
+
+
+
+#@@@>sdROOTFSd???
 sdROOTFS="/dev/sda2" #NOTE: > cmdline.txt@boot/os3=non-destructive@init<part/formatterinramfs-skipsthisfornow EDITIFNEEDEDTHO
 
 
-#https://raw.githubusercontent.com/wulfy23/rpi4-multiboot/master/multiboot/setup/rpi-multiboot.sh
 
-#gRurepo="wulfy23/rpi4"; GmbSUB="builds/multiboot"
 gRurepo="wulfy23/rpi4-multiboot"
 gRbasep="https://raw.githubusercontent.com/${gRurepo}"
 gRbasep="${gRbasep}/master"
 GmbSUB="multiboot"
-
-
-
-
-
-
-
-#~
-#https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz
-#https://raw.githubusercontent.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz
-#echo "https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz"
-#echo "$gRbasep/$GmbSUB/current/openwrt/snapshot.tar.gz"
-#exit 0
-
-
 
 LATESTIMG="$gRbasep/$GmbSUB/current/openwrt/snapshot.tar.gz"
 
@@ -41,16 +168,83 @@ LATESTIMG="$gRbasep/$GmbSUB/current/openwrt/snapshot.tar.gz"
 
 
 
-restoreOSdefault="os99" #os99=baseos<only usedwhen neworwecant findsuitableANDtoggleOSpersist = z #TOP FOR NOW WHEN TESTED toggleOSpersist=1 #@@@
+############# TEMPat1 > [ -n "DEBUG" ] && dbgslp=1 #z@:-0
+dbgslp=1 #!Q!
+
+
+
+#NB:20200916>hardcoded>install Z>os99 UPDATETOTHIS
+restoreOSdefault="os99" #os99=baseos<onlyusedwhenneworwecantfindsuitableANDtoggleOSpersist = z #TOPFORNOWTESTEDtoggleOSpersist=1 #@@@
+
+
+
+
+
+rm /tmp/blkid 2>/dev/null #@blkidmulti||BLKID
+if [ ! -f /tmp/blkid ]; then blkid > /tmp/blkid; fi
+BLKID="cat /tmp/blkid"
+
+
+
+
 
 
 
 
 echU() {
-    if [ ! -z "$DEBUG" ]; then echo "${*}"; fi
+    if [ ! -z "$DEBUG" ]; then
+        echo "${*}"
+        sleep ${dbgslp:-0}
+    fi
 }
 
+
 fails() { echo "${*}" && exit 1; }
+
+
+
+prereqcheka() {
+FN="prereqcheka"
+
+#echo "$FN VERBOSE-manual-ON"; VERBOSE=1
+
+    if [ -f /root/.$(basename $0).prereq ]; then
+		[ -n "$VERBOSE" ] && echo "V> $PREREQ@/root/.$(basename $0).prereq [ok]"
+        return 0
+    fi
+
+    for COMMAND in $PREREQ; do
+        if ! command -v $COMMAND > /dev/null; then
+            echo "$COMMAND [nope]"
+            MISSINGCOMMANDS="${MISSINGCOMMANDS} $COMMAND" #FAIL_REASON="$COMMAND not found"; return 1
+		else
+		    [ -n "$VERBOSE" ] && echo "V> $COMMAND [ok]"
+        fi
+    done
+
+    if [ ! -z "$MISSINGCOMMANDS" ]; then
+		#[ -n "$VERBOSE" ] && echo "$MISSINGCOMMANDS [please-install]"
+		echo "$MISSINGCOMMANDS [please-install]"
+        return 1
+    fi
+
+    touch /root/.$(basename $0).prereq
+    return 0
+}
+
+
+
+
+
+
+if [ ! -z "${PREREQ}" ]; then
+	prereqcheka
+fi
+
+
+
+#echo "SMILEY"; exit 0
+
 
 
 
@@ -82,11 +276,10 @@ runascript() { FN="runascript"
 
 
 
+
 extractatar() { FN="extractatar"
 
-
-    echo "TARVERBOSEMANUAL"
-    VERBOSE=1
+    echo "$FN> VERBOSE-MANUAL-ON"; VERBOSE=1
 
     local tarFILE="${1}"
     local tarBASE="${2}"
@@ -110,10 +303,11 @@ extractatar() { FN="extractatar"
 
 
 
+
+
 curlgitfile() { FN="curlgitfile"
 
-    #echo "BIGFOOT"
-    #set -x
+    #echo "BIGFOOT"; set -x
 
     local gitFILE="${1}"; local gitFILEo="${2}"; local gitFILEn=$(basename $gitFILE) #for error 404 name
     if curl -s -L "${gitFILE}" 1>$gitFILEo; then
@@ -139,81 +333,74 @@ curlgitfile() { FN="curlgitfile"
 
 
 
+
 initbootOS() { #v1<setup.sh > v1.5 'boot+init' means setup a folder on /boot/osX
+
 #local OSdir="$1"
 #param2 initramfsFROM = os0&&||altextrastuff
 
 
     local OSinitramfs=
 
-
-if [ -z "$1" ]; then echo "no OSdir" && exit 1; fi
-
+    if [ -z "$1" ]; then echo "no OSdir" && exit 1; fi
 
 
-if [ -f "$2" ]; then
-	echo "initramfs"
-	OSinitramfs="${2}"
-	#OSinitramfs=1
-else
-	OSrootfspart="$2"
-fi
+    if [ -f "$2" ]; then
+	    echo "initramfs"
+	    OSinitramfs="${2}"
+	    #OSinitramfs=1
+    else
+	    OSrootfspart="$2"
+    fi
 
 
+    local OSdir="$1"
+    local OSbase="/boot"
 
-local OSdir="$1"
-local OSbase="/boot"
 
-
-if [ ! -d "$OSbase" ]; then echo "OSbase: $OSbase/ [notpresent->exit 1]"; exit 1; fi
-if [ -d "$OSbase/$OSdir" ]; then echo "OSdir: $OSbase/$OSdir exists return 0"; return 0; fi
+    if [ ! -d "$OSbase" ]; then echo "OSbase: $OSbase/ [notpresent->exit 1]"; exit 1; fi
+    if [ -d "$OSbase/$OSdir" ]; then echo "OSdir: $OSbase/$OSdir exists return 0"; return 0; fi
 
 
 #set -x
-echo "Setting up: $OSbase/$OSdir"; sleep 2
-mkdir -p "$OSbase/$OSdir" "$OSbase/$OSdir/config" "$OSbase/$OSdir/config/raw"
-
-
-
-
+    echo "Setting up: $OSbase/$OSdir"; sleep 2
+    mkdir -p "$OSbase/$OSdir" "$OSbase/$OSdir/config" "$OSbase/$OSdir/config/raw"
 #set +x
 
-if [ ! -z "$OSinitramfs" ]; then
-    #echo "cp $RAMFSv $OSbase/$OSdir/kernel8.img"
-    #cp $RAMFSv "$OSbase/$OSdir/kernel8.img"
-    echo "$OSdir ramfs kernel"
-    echo "cp $OSinitramfs $OSbase/$OSdir/kernel8.img"
-    cp $OSinitramfs "$OSbase/$OSdir/kernel8.img"
 
-else
-    echo "$OSdir regular kernel"
-    cp /boot/kernel8.img "$OSbase/$OSdir/" #PUTITTHERENOW will OVERWRITE with INITRAM
-
-fi
-
-
-sleep 2
+    if [ ! -z "$OSinitramfs" ]; then #echo "cp $RAMFSv $OSbase/$OSdir/kernel8.img"; cp $RAMFSv "$OSbase/$OSdir/kernel8.img"
+        echo "$OSdir ramfs kernel"
+        echo "cp $OSinitramfs $OSbase/$OSdir/kernel8.img"
+        cp $OSinitramfs "$OSbase/$OSdir/kernel8.img"
+    else
+        echo "$OSdir regular kernel"
+        cp /boot/kernel8.img "$OSbase/$OSdir/" #PUTITTHERENOW will OVERWRITE with INITRAM
+    fi
+sleep ${dbgslp:-0}
 
 
 
+    cp /boot/bcm2711-rpi-4-b.dtb "$OSbase/$OSdir/"
+    cp /boot/c*.txt "$OSbase/$OSdir/"
+    cp /boot/cmdline.txt "$OSbase/$OSdir/cmdline.txt.original"
 
 
-cp /boot/bcm2711-rpi-4-b.dtb "$OSbase/$OSdir/"
-cp /boot/c*.txt "$OSbase/$OSdir/"
-cp /boot/cmdline.txt "$OSbase/$OSdir/cmdline.txt.original"
 
-if [ ! -z "$OSinitramfs" ]; then
-	echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir ramopt=partinit" > "$OSbase/$OSdir/cmdline.txt"
-else
-	echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir" > "$OSbase/$OSdir/cmdline.txt"
-fi #echo a whole new line or sed #sed -i "s!root=/dev/mmcblk0p2!root=$rootfspart!g" $bootpart/cmdline.tx
+    if [ ! -z "$OSinitramfs" ]; then
+	    echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir ramopt=partinit" > "$OSbase/$OSdir/cmdline.txt"
+    else
+	    echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir" > "$OSbase/$OSdir/cmdline.txt"
+    fi #echo a whole new line or sed #sed -i "s!root=/dev/mmcblk0p2!root=$rootfspart!g" $bootpart/cmdline.tx
 
+
+
+echU "Write default: $OSbase/$OSdir/os.ini"
 
 ############################### @@@>>> multiboot.ini
 cat <<EOF > $OSbase/$OSdir/os.ini
+############################# NOTE this file currently unused
 Prootpart="$OSrootfspart"
 rootpart="$OSrootfspart"
-Pbootpfx="$OSbase/$OSdir"
 Pbootpfx="$OSbase/$OSdir"
 ##############################unused
 Pkname="kernel8.img"
@@ -224,14 +411,10 @@ EOF
 
 #NB1rec
 #quiet ramdisk_size=32768 root=/dev/ram0 init=/init vt.cur_default=1 elevator=deadline sdhci.debug_quirks2=4
-#NB>bootraspbiank7cmdline console=serial0,115200 console=tty1 root=/dev/mmcblk0p7 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles
-
-
-
-
-
-
-
+#NB>bootraspbiank7cmdline#### console=serial0,115200 console=tty1
+############################# root=/dev/mmcblk0p7 rootfstype=ext4
+############################# elevator=deadline fsck.repair=yes
+############################# rootwait quiet splash plymouth.ignore-serial-consoles
 
 
 
@@ -246,6 +429,12 @@ cat <<EOF
 
     $(basename $0) [refresh]                        #download the latest suppl files
 
+    $(basename $0) install r14419-23-mwan3.tar.gz os2 [conf=export|none]
+    $(basename $0) install http://r14419-23-mwan3.tar.gz os2 enter conf
+        $LATESTIMG os2
+
+    $(basename $0) info                             #various state / installed os info
+
     $(basename $0) [toggle] [slotN||off]            #switch between (next)boot osNUM
 
             i.e.: toggle os2
@@ -255,30 +444,36 @@ cat <<EOF
                     revertos=[keep|osN] #operating system to rebootinto after||fallback from toggleOS[orsimilar?] is performed
                     #!@ENTER... (~default@topvar<-z=stay||current)
 
-
-
-
-
-################## script2 imports
-
-
-
-	$(basename $0) install r14419-23-mwan3.tar.gz os2 [conf=export|none]
-	$(basename $0) install http://r14419-23-mwan3.tar.gz os2 enter conf
-
-        $LATESTIMG os2
-
-
-	$(basename $0) info
-
-
+    --help|-h|help
 
 EOF
+
 
 }
 
 #https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz
 #https://github.com/wulfy23/rpi4-multiboot/blob/master/multiboot/current/openwrt/snapshot.tar.gz
+
+
+usageparkinfo() {
+:
+    ########################################3>>>TBA
+    #$(basename $0) ramboot NAME (once off)
+    #or
+    #$(basename $0) toggle os0 ramopt=xyz enter ???
+    #or
+    #$(basename $0) toggle os0 ramopt=xyz enter keep ??? #!A||B||C
+    ###############################################
+
+
+    #backupboot < backupfolderONusbPART for sysupgrade... retain all bootfiles... ( use instead of multi.tar.gz ) > usbosX only
+    #mmc os still need to be re-installed || could tar them into either just rootfs or seperate "install like tar.gz"
+
+
+}
+
+
+
 
 
 
@@ -290,21 +485,44 @@ EOF
 #DEBUG=1 ################# check the basic repo and prereq
 
 
-if [ -z "$1" ]; then usage && exit 0; fi #early usage bork
+
+
+
+if [ -z "$1" ]; then usage && exit 0; fi #early usage bork @info is only 1 param cmd?
+
+
 
 if $(command -v curl 2>/dev/null 1>/dev/null); then echU "curl [present]"; else ISSUES="${ISSUES} curlnotinstalled"; fi
-if curl -s -L "$gRbasep/README" 1>/dev/null; then echU "repo-online"; else ISSUES="${ISSUES} repooffline:$gRbasep/README"; fi
+
+
+if [ ! -f "/tmp/.$(basename $0).repocheck.${Dupd}" ]; then
+    if curl -s -L "$gRbasep/README" 1>/dev/null; then
+        echU "repo-online"; touch "/tmp/.$(basename $0).repocheck.${Dupd}"
+    else
+        ISSUES="${ISSUES} repooffline:$gRbasep/README"
+    fi
+fi
 if [ ! -z "$ISSUES" ]; then echo "issues: $ISSUES" && exit 1; fi
 
 
 allparams="${*}"
+
 sACTION="$1"
+
 scrMETHOD="sh1" #STATIX to test > set in sACTIONw-all-gSCRpaths LEAVE as a default
+
 mmcpartcount=$(blkid | grep '^/dev/mmcblk0' | wc -l)
+
+
+
+
 #echo "SMOKEYDEBUG"; DEBUG=1
 
 
-if [ -f /boot/.initialize ]; then echo "multiboot [non-complete-state]>reboot(wait 5mins reboots twice) or repair"; exit 0; fi
+
+
+
+
 
 
 if [ -f /boot/multiboot.ini ]; then #DEBUG=1
@@ -318,59 +536,84 @@ fi #VANILLA@initsACTIONcaseexit #@@@~if VANILLA &&|| POPULATE >>> INSTALLSLOT="o
 
 
 
+#if [ -f /boot/.initialize ]; then echo "multiboot [non-complete-state]>reboot(wait 5mins reboots twice) or repair"; exit 0; fi
+if [ -f /boot/.initialize ] && [ "$sACTION" != "info" ]; then #letthroughinfo
+    : #echo "multiboot [non-complete-state]>reboot(wait 5mins reboots twice) or repair"
+elif [ -f /boot/.initialize ]; then
+    echo "multiboot [non-complete-state]>reboot(wait 5mins reboots twice) or repair [$0 info]"
+    exit 0
+else
+    if [ ! -z "$VANILLA" ]; then #FRESH or SETUP
+        echo "fresh-os"; sleep 2
+    fi
+fi
+
+
+
+
+
+
+
+
+#awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g'
+
+
+
+#awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g' | while read... grep isvalid=1 /boot/.../os.ini
+
+
+
+
+
+
+
+
+
+echU "DBGCASETOP: sACTION:$sACTION ${*}" #[ -n "$DEBUG" ] && echo "DBGCASETOP: sACTION:$sACTION ${*}"
+
+
+
 
 
 
 #@v1 INTGRATE PARSE EXPANDPARAMS??? inside below case?
 #VALUE=`echo $1 | sed 's/^[^=]*=//g'`
 case "$sACTION" in
-    install) DOINSTALL=1 #notusedyet->@skipsections-wip
+    install)
+            DOINSTALL=1
+            #@@@wasntshifted
+            shift 1
+
+            echo "DBG-CASE@install)sACTION:$sACTION ${*}"
+            echU "DBG-CASE@install)sACTION:$sACTION ${*}"
+            # echo "BURRY"; exit 0
 
 
-    #@@@wasntshifted
-    shift 1
-
-
-    echo "DBGCASETOP: (install)sACTION:$sACTION ${*}"
-   # echo "BURRY"; exit 0
-
-
+            ###################################################################################################
             #-!!!OSOPERATIONS(file?)<<<~toggle--------otherone@setup
             #1wasfile> install||info||backup||migrate||>>>toggle???@<enter etc.... @sACTION
             #2image@install
-
-
-
-
-
-
-            ########################################## ADDS
-            #if [ -z "$1" ]; then
-            #	echu "param1: targz/http/s empty" && usage && exit 1
-            #fi
-
-            #if [ -z "$2" ]; then
-            #	echu "param2: os slot empty [os1|os2]" && usage && exit 1
-            #fi
-
-            #caseshift||grep-q<!!!if [ -z "$3" ]; then echU "param3: config not given"; else CONFIG=1; fi
-
-
-#sACTION="$1"
-#shift
-
-
-#	case "$sACTION" in
-#		install)
+            ########################################## ADDSOLD
+            #if [ -z "$1" ]; then echu "param1: targz/http/s empty" && usage && exit 1; fi
+            #if [ -z "$2" ]; then echu "param2: os slot empty [os1|os2]" && usage && exit 1; fi
+            ####???caseshift||grep-q<!!!if [ -z "$3" ]; then echU "param3: config not given"; else CONFIG=1; fi
+            #sACTION="$1"
+            #shift
+            #	case "$sACTION" in
+            #		install)
+            ###################################################################################################
 
 			IMAGE="$1"
 			if [ -z "$2" ]; then echo "$0 $sACTION $IMAGE slot-name?"; usage; exit 0; fi
-			dSLOT="$2"
-			if [ -z "$3" ]; then
+			dSLOT="$2" #@@@slotvalid?||resolve-slotrootfsblockdev-etc.etc.
+            if [ -z "$3" ]; then
 				shift 2
 			else
 				: #
 			fi
+
+
+
 
 #		;;
 
@@ -408,21 +651,40 @@ esac
 
 
 
-
-
-
     ;;
+
+
+
 
 
 
     ##################################### ORIGINALONIMPORTNEEDSFIXING
     info)
-			OSINFO="${1:-summary}"
-			if [ -z "$2" ]; then
-				shift 1
-			else
-				:
-			fi
+
+
+            DOINFO=1
+            #[ -n "$DEBUG" ] && echo "ZEBRA allparams: $allparams"
+            #[ -n "$DEBUG" ] && echo "ZEBRA allavailparams: ${*}"
+            #echo "ZEBRA allparams: $allparams"
+            #echo "ZEBRA allavailparams: ${*}"
+            echU "ZEBRA allparams: $allparams"
+            echU "ZEBRA allavailparams: ${*}"
+
+            shift
+
+
+
+            #echo "ZEBRA exit"; exit 0
+
+
+
+            #OSINFO="${1:-summary}"
+			#if [ -z "$2" ]; then
+			#	shift 1
+			#else
+			#	:
+			#fi
+
 	;;
     #################################################################
 
@@ -461,14 +723,17 @@ esac
     toggle)
 	    DOTOGGLE=1
 
+        echo "DBG>>> toggle > DEBUGon"; DEBUG=1
 
-        DEBUG=1
-        echU "toggle allparams: $allparams"
+        [ -n "$DEBUG" ] && echU "toggle allparams: $allparams"
+
+
 
         if [ -z "$2" ]; then
 		    #NONISSUESecho "please enter param2: os1||os2||os3||off" && usage #&& exit 0 #@@@!!!<<< probably leave on see what happens
             ISSUES="${ISSUES} toggle PARAM2-MISSING" #ISSUES="${ISSUES} please enter param2: os1||os2||os3||off"
 	    fi
+
 
 
         if [ ! -z "$2" ]; then
@@ -482,12 +747,18 @@ esac
 
         fi
 
+
+
         if [ ! -z "$ISSUES" ]; then fails "togglesetup-fails: $ISSUES"; fi
         shift 2 #echU "SHIFT2 dbg-LEFTOVER-params-toggle-parse1-end[$#]: ${*}"; sleep 3
         #echo "BEETLE"; exit 50 #fornowdontdescend likely need to... then run early checks then function
     ;;
     ################################################# v1 IMPORTSEND
 
+
+
+
+    --help|-h|help) usage && exit 0; ;; #seperate from * >> no-params-print-miniinfo
     *)
         echo "unknown action: $sACTION" && usage && exit 0
     ;;
@@ -505,6 +776,9 @@ esac
 
 #verbose||summary||debug
 if [ "${#}" -gt 0 ]; then
+
+    #info @ >>> ALLEXTRA
+
 
     echU "dbg-LEFTOVER-params-POSTPARSE1[$#]: ${*}"
 
@@ -546,7 +820,10 @@ if [ "${#}" -gt 0 ]; then
                     esac
                 ;;
 
-                *) echo "no-rules: $1"; ;;
+                #*) echo "no-rules: $1"; ;;
+                *)
+                    echo "no-rules: $1"; sleep 2
+                ;;
         esac
 
 
@@ -554,12 +831,12 @@ if [ "${#}" -gt 0 ]; then
     done
 
 else
+    #@DEBUG
     echU "allparams-cleared-shifted"
 fi
 
 
 #set -x
-
 
 
 
@@ -1082,6 +1359,14 @@ if [ ! -z "$VANILLA" ] && [ -z "$ISSUES" ]; then ####################@@@ origina
 
 
 
+
+
+
+
+
+
+
+
 echo "######################### CP STUFF"
 #set -x
 
@@ -1115,6 +1400,9 @@ cp /boot/config.txt /boot/config.txt.os3; echo "os_prefix=os3/" >> /boot/config.
 #set +x
 
 
+
+
+
     #NOTE: this is a generic setup dump... "install" dumps and untars current config to slotrootfs
     echo "Dumping recent osrestore.tar.gz > /boot"; sleep 2; sysupgrade -k -b /boot/osrestore.tar.gz
 	#######@@@@@toggle 'conf' || conf=backup1.tar.gz? || conf=current?
@@ -1133,14 +1421,26 @@ cp /boot/config.txt /boot/config.txt.os3; echo "os_prefix=os3/" >> /boot/config.
 
     #@@@!!!!!!!!!!!!!!!!!!!! toggle os0 && checkup on os0/cmdline.txt = ramfsopt=partinit
     #NOTE: below assumes its vanilla with all commented out and present... check those conditions here... too!!!
-    #setconfigval "/boot/config.txt" enable "os_prefix=os0/"
 
 
     #dbg still mounted?
 
     #if all ok... && ! -z noreboot(aka stop at final payload/s noapply?) <NOPE'now' print a message with a 5 sec pause and reboot
+    #else PRINT ISSUES &&||cleanup||repairish
 
-#else PRINT ISSUES &&||cleanup||repairish
+
+    #setconfigval "/boot/config.txt" enable "os_prefix=os0/"
+    echo "set os0 in config.txt"
+    sed -i 's!#os_prefix=os0/!os_prefix=os0/!' /boot/config.txt
+    sleep 2
+
+
+    echo "rebooting to setup alt rootfs partitions..."
+    sleep 6
+    reboot
+
+
+
 fi
 
 
@@ -1151,9 +1451,10 @@ fi #END-DOINITWRAPPER ##########################################################
 
 
 
-DEBUG=1
 if [ ! -z "$DOREFRESH" ]; then
     #bootmountcheckheretoo
+
+    echo "DOREFRESHDEBUGFORCEON"; sleep 2
 
     if [ -n "$DEBUG" ]; then
         echo "     setupscript: $gRSCR"
@@ -1161,7 +1462,7 @@ if [ ! -z "$DOREFRESH" ]; then
 
         echo "https://raw.githubusercontent.com/wulfy23/rpi4-multiboot/master/multiboot/setup/rpi-multiboot.sh"
 
-    #echo "WCONKY"; exit 0
+        #echo "WCONKY"; exit 0
 
     fi
     gitdlcorefiles #&& exit 0 || fails
@@ -1174,43 +1475,6 @@ fi
 
 
 
-SKUPTHE() {
-
-exit 0
-
-
-#@@@v1
-#if grep -q '^os_prefix=' /boot/config.txt; then
-#	echo "config.txt has os_prefix... [setup-already?]" && exit 0
-#fi
-
-
-
-if [ "$1" = status ]; then
-    echo "status"
-	cat /boot/config.txt | grep '^os_prefix'
-fi
-
-
-
-
-
-####################################### was related to reboot/reformat status
-####################################### NOW initialize used for reformat(orsucees?) failed message
-if [ ! -f /boot/.initialize ]; then
-	echo "################################### this will reboot twice to setup extra partitions"
-	echo "please> touch /boot/.initialize"
-	echo ""
-	echo "INSTRUCTIONS re sda3 draft (mostly ignore-ish)"
-	echo "!!! if you wish to use sda3 as os3 then you must ensure it is inserted now with minimum a partition (unformatted)"
-	echo "you can still use it later tho..."
-	echo ""
-	echo "################################### to confirm then rerun"
-	exit 0
-fi
-#touch /boot/.initialize
-
-}
 
 
 
@@ -1219,8 +1483,12 @@ fi
 
 
 
-##################################### EXITPART1
-##################################### EXITPART1
+
+
+
+
+
+
 ##################################### EXITPART1
 ##################################### EXITPART1
 ##################################### EXITPART1
@@ -1228,11 +1496,7 @@ fi
 ##################################### EXITPART1
 ##################################### EXITPART1
 ##################################### EXITPART1
-##################################### EXITPART1
-##################################### EXITPART1
-echo PART2
-
-
+[ -n "$DEBUG" ] && echo "PART2: debug:$DEBUG" #echo PART2
 
 
 
@@ -1463,6 +1727,10 @@ rpi4multi_do_flash_usb() {
 
 	echo "extract $rootfspart/"
 	echo "(cd /rootfs && tar -xzvf *rootfs.tar.gz)"
+
+    sleep 2
+
+
 	#(cd /rootfs && tar -xzvf *rootfs.tar.gz)
 	(cd /rootfs && tar -xzf *rootfs.tar.gz)
 	#rm /rootfs/rootfs.tar.gz
@@ -1470,46 +1738,42 @@ rpi4multi_do_flash_usb() {
 
 
 
-
-	echo "fixup cmdline.txt"
-	sed -i "s!root=/dev/mmcblk0p2!root=$rootfspart!g" $bootpart/cmdline.txt
+	echo "fixup cmdline.txt" #@@@report||precheckneeded
+    sed -i "s!root=/dev/mmcblk0p2!root=$rootfspart!g" $bootpart/cmdline.txt
 	cat $bootpart/cmdline.txt
 	sleep 2
 
 
 
+
+
+    #if CONFIG or .vanilla
 	echo "config $rootfspart/"
-	#if CONFIG or .vanilla
 	sysupgrade -k -b /rootfs/r.tar.gz
 	(cd /rootfs && tar -xvzf r.tar.gz)
 	sleep 2
 
 
 
-	echo "toggle $rootfspart/"
+	echo "toggle $rootfspart/"; sleep 2
+
+	echo "sync-n-umount $rootfspart @ /rootfs TODO"; sleep 2
 
 
-
-	echo "sync-n-umount $rootfspart @ /rootfs TODO"
-
-	sleep 2
+	echo "image install [complete]"; exit 0 #echo "SAFETY2 exit"; exit 0
 
 
-	echo "SAFETY2 exit"; exit 0
+	#if [ ! -f "$UPGRADE_BACKUP" ]; then
+	#	echo "$UPGRADE_BACKUP [no keep settings] > skip cp to /rootfs/$BACKUP_FILE"; sleep 3
+	#else
+	#	echo "cp -v $UPGRADE_BACKUP /rootfs/$BACKUP_FILE"; sleep 3
+	#	cp -v $UPGRADE_BACKUP /rootfs/$BACKUP_FILE
+	#	sleep 2
+	#fi
 
-
-	if [ ! -f "$UPGRADE_BACKUP" ]; then
-		echo "$UPGRADE_BACKUP [no keep settings] > skip cp to /rootfs/$BACKUP_FILE"; sleep 3
-	else
-		echo "cp -v $UPGRADE_BACKUP /rootfs/$BACKUP_FILE"; sleep 3
-		cp -v $UPGRADE_BACKUP /rootfs/$BACKUP_FILE
-		sleep 2
-	fi
-
-
-	sync
-	umount -a || sleep 5 && umount -a
-	reboot -f
+	#sync
+	#umount -a || sleep 5 && umount -a
+	#reboot -f
 
 }
 
@@ -1754,16 +2018,59 @@ echo ""
 
 
 
-DEBUG=1
 
 
 
-echU() {
-	if [ ! -z "$DEBUG" ]; then
-		#echo "${*}"
-		echo "echU>>>>>>>>>>>>>>>>>>>>>>>>>>> ${*}"
-	fi
-	sleep 2
+
+
+
+
+
+#local FILE="$2"
+
+
+
+
+
+
+
+
+
+
+
+
+#@@@!!!@>getfsblkid.func
+
+
+
+blkidmulti() {
+
+    #! DISK global RM@top > /tmp/blkid
+    #!grep-vswap@labels
+
+
+#MOVEDtoTOP
+#BLKID="cat /tmp/blkid"
+#if [ ! -f /tmp/blkid ]; then blkid > /tmp/blkid; fi
+
+
+
+
+case "$1" in
+    labels)
+        $BLKID | grep -v 'TYPE="swap"' | \
+        awk -F "LABEL=" '{printf $2; printf "\n"}' | sed -e 's/"//g' | sed -e "s/\'//g" | awk '{print $1}'
+    ;;
+    mmcnum)
+        $BLKID | grep "^$DISK" | wc -l
+    ;;
+    mmcuuidnum)
+        $BLKID | grep "^$DISK" | grep ' UUID=' | wc -l
+    ;;
+    *)
+        $BLKID
+    ;;
+esac
 }
 
 
@@ -1775,6 +2082,25 @@ echU() {
 
 
 
+getfsblkidsampkeonky() {
+
+if [ "$2" == "fs" ]; then valGET="TYPE";
+elif [ "$2" == "uuid" ]; then valGET="UUID";
+elif [ "$2" == "label" ]; then valGET="LABEL";
+else valGET="TYPE";
+fi
+for o in `block info | grep "$1"`; do
+	feilD="`echo "${o}" | cut -d'=' -f1`"
+	if [ "$feilD" == "$valGET" ]; then
+		foundVAL="`echo "${o}" | cut -d'=' -f2 | cut -d'"' -f2`"
+		echo "$foundVAL"
+	fi
+done
+}
+
+#BLOCK
+#getfsblkid "/dev/sdf1" (fs|label|uuid) #added 20190709 used by usbdevlistpossible
+#block info "/dev/sda3" | grep -o -e "UUID=\S*"
 
 
 
@@ -1787,6 +2113,164 @@ echU() {
 
 
 
+#DEBUG=1
+
+
+
+
+if [ ! -z "$DOINFO" ]; then #DOINFO=1
+
+
+    if [ -z "$DISK" ]; then
+        DISK="/dev/mmcblk0p"
+    else
+        echo "DISK: $DISK [set-early]"; sleep 3
+    fi
+
+
+    blkPARTSmmcnum=$(blkidmulti "mmcnum")
+    blkPARTSmmcUUIDnum=$(blkidmulti "mmcuuidnum")
+    #blkPARTSmmcnum=$(blkid | grep "^$DISK" | wc -l)
+    #blkPARTSmmcUUIDnum=$(blkid | grep "^$DISK" | grep ' UUID=' | wc -l)
+
+
+
+    osPFXsetCNT=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix' | wc -l)
+    osPFXoffCNT=$(cat /boot/config.txt 2>/dev/null | grep '#os_prefix' | wc -l)
+
+
+
+
+    echo "       blkmmccnt: $blkPARTSmmcnum"
+    echo "     blkmmcfscnt: $blkPARTSmmcUUIDnum"
+
+    if [ "$blkPARTSmmcnum" -eq 2 ] && [ "$blkPARTSmmcUUIDnum" -eq 2 ]; then
+        blkPARTSstock=1
+    fi
+
+
+
+
+
+    echo "################################################### disk-to-os-detect-tests"
+    blkidmulti "labels"
+
+
+    if [ -f /boot/.initialize ] && [ ! -z "$blkPARTSstock" ]; then
+
+        echo "################################################### INITIALIZE stage2"
+        #if blkPARTSmmcUUIDnum 4 ok 2 reboot or issues...
+        echo ""
+        echo "###########------------> reboot or resolve partiion issues"
+        echo ""
+    elif [ -f /boot/.initialize ] && [ -z "$blkPARTSstock" ]; then
+        echo ".initialize remove or partition issues"
+    elif [ ! -f /boot/.initialize ] && [ "$blkPARTSmmcUUIDnum" -eq 4 ]; then
+        echo "################################################### INITIALIZE completed"
+    else
+        echo "likely partition issues"
+        :
+    fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    echo "################################################### INFO"
+
+    echo "### config.txt: os_prefix"
+    #osPFXsetCNT=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix' | wc -l)
+    if [ "$osPFXsetCNT" -eq 1 ]; then
+        cat /boot/config.txt 2>/dev/null | grep '^os_prefix'
+    elif [ "$osPFXsetCNT" -gt 1 ]; then
+        echo "WARNING: /boot/config.txt os_prefix > multiple enabled entries"
+        cat /boot/config.txt 2>/dev/null | grep '^os_prefix'
+    else
+        #osPFXoffCNT=$(cat /boot/config.txt 2>/dev/null | grep '#os_prefix' | wc -l)
+        if [ "$osPFXoffCNT" -eq 3 ]; then
+            echo "osPFXoffCNT: $osPFXoffCNT [avg]"
+            cat /boot/config.txt 2>/dev/null | grep '#os_prefix'
+        elif [ "$osPFXoffCNT" -gt 3 ]; then
+            echo "osPFXoffCNT: $osPFXoffCNT [added?]"
+            cat /boot/config.txt 2>/dev/null | grep '#os_prefix'
+        elif [ "$osPFXoffCNT" -eq 0 ]; then
+            INFONOTE="${INFONOTE} config.txt-zeropfx"
+            echo "osPFXoffCNT: $osPFXoffCNT [zero-notsetup>init or config.txt changed>checkbackup?]"
+            cat /boot/config.txt 2>/dev/null | grep '#os_prefix'
+        else
+            echo "osPFXoffCNT: $osPFXoffCNT [1-2 edited]" #[6+wont hit this -gt 3
+            cat /boot/config.txt 2>/dev/null | grep '#os_prefix'
+        fi
+    fi
+
+
+
+
+
+    echo -n "################################################### /boot/multiboot.ini"
+    if [ -f /boot/multiboot.ini ]; then
+        echo " [ok]"
+        cat /boot/multiboot.ini 2>/dev/null | grep -vE '(^#|^$)'
+    else
+        echo " [nofile]"
+    fi
+
+    echo -n "################################################### PFX-REST"
+    if [ -f /boot/.prefixrestore ]; then
+        echo $(cat /boot/.prefixrestore)
+    else
+        echo "not-set"
+    fi
+
+
+
+    validaterootfsparts() {
+
+    #MANUAL CHECKING OF -b &&|| root=@slot/cmdline.txt -> slot/os.ini<isvalid=1 isvalid=1===dontverifyblockdev/prechecked (i.e. usb)
+
+        find /boot | grep '/cmdline.txt$' | while read THIS; do
+            dirTHIS=$(dirname $THIS)
+            #echo -n "$THIS"
+            echo -n "$dirTHIS"
+
+            if [ "$dirTHIS" = "/boot" ]; then
+                echo " [baseos]"
+            elif grep -q '^isvalid=1' $(dirname $THIS)/os.ini; then #2>/dev/null
+                echo " [valid]"
+            else
+                echo " [invalid]"
+            fi
+            which usleep &>/dev/null && usleep 70000 #sleep 1
+        done
+
+
+
+    }
+
+
+
+    validaterootfsparts
+
+
+    echo ""
+
+    if [ ! -z "$INFONOTE" ]; then
+        echo "INFONOTE: $INFONOTE"
+    fi
+
+    exit 0
+
+fi
 
 
 
@@ -1834,6 +2318,65 @@ fi
 #			NON-ONSYSLOGICEND
 exit 0
 #############################################################
+
+
+
+
+
+
+
+
+SKUPTHE() {
+
+exit 0
+
+
+#@@@v1
+#if grep -q '^os_prefix=' /boot/config.txt; then
+#	echo "config.txt has os_prefix... [setup-already?]" && exit 0
+#fi
+
+
+
+if [ "$1" = status ]; then
+    echo "status"
+	cat /boot/config.txt | grep '^os_prefix'
+fi
+
+
+
+####################################### was related to reboot/reformat status
+####################################### NOW initialize used for reformat(orsucees?) failed message
+if [ ! -f /boot/.initialize ]; then
+	echo "################################### this will reboot twice to setup extra partitions"
+	echo "please> touch /boot/.initialize"
+	echo ""
+	echo "INSTRUCTIONS re sda3 draft (mostly ignore-ish)"
+	echo "!!! if you wish to use sda3 as os3 then you must ensure it is inserted now with minimum a partition (unformatted)"
+	echo "you can still use it later tho..."
+	echo ""
+	echo "################################### to confirm then rerun"
+	exit 0
+fi
+#touch /boot/.initialize
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2064,16 +2607,13 @@ blarblar() {
 
 
 
-
+####################################################################################### ORIGINAL-installORinfoPARSE
+####################################################################################### ORIGINAL-installORinfoPARSE
+####################################################################################### ORIGINAL-installORinfoPARSE
 
 #-!!!OSOPERATIONS(file?)<<<~toggle--------otherone@setup
 #1wasfile> install||info||backup||migrate||>>>toggle???@<enter etc.... @sACTION
 #2image@install
-
-
-
-
-
 
 ########################################## ADDS
 #if [ -z "$1" ]; then
@@ -2106,13 +2646,22 @@ shift
 		;;
 
 		info)
-			OSINFO="${1:-summary}"
+
+            echo "SLURP"
+            set -x
+
+            OSINFO="${1:-summary}"
 			if [ -z "$2" ]; then
 				shift 1
 			else
 				:
 			fi
-		;;
+
+            echo "SLURPY exit"
+            exit 0
+
+
+        ;;
 
 		*)
 			echo "$sACTION [unsupported]"; usage; exit 0
@@ -2148,6 +2697,9 @@ esac
 #probable config synctoall function || cp restore.tar.gz ...
 
 
+####################################################################################### ORIGINAL-installORinfoPARSE
+####################################################################################### ORIGINAL-installORinfoPARSE
+####################################################################################### ORIGINAL-installORinfoPARSE
 
 
 
@@ -2166,5 +2718,124 @@ esac
 
 
 
+
+##################>fboot||startup>custfunc.sh<<<getcmdlineprop
+#@@@v1
+#if grep -q '^os_prefix=' /boot/config.txt; then
+#	echo "config.txt has os_prefix... [setup-already?]" && exit 0
+#fi
+
+
+
+
+
+
+
+
+############################################################### echU-install||info||STAGE2 version
+echU() {
+	if [ ! -z "$DEBUG" ]; then
+		#echo "${*}"
+		echo "echU>>>>>>>>>>>>>>>>>>>>>>>>>>> ${*}"
+	fi
+	sleep 2
+}
+
+
+
+
+
+
+
+
+
+
+
+
+if curl -s -L "$gRbasep/README" 1>/dev/null; then echU "repo-online"; else ISSUES="${ISSUES} repooffline:$gRbasep/README"; fi
+
+
+
+
+
+
+
+
+
+
+    #awk -F 'ubi.mtd=' '{printf $2}' /proc/cmdline | sed -e 's/ .*$//'
+	#awk '{print $1; printf "\n"}' <<<$'foo bar\nspam egg'
+    #| sed -e 's/"//g' | sed -e "s/\'//g"
+	#blkid | awk -F "$VALUE" '{printf $2}' | sed -e 's/"//g' | sed -e "s/\'//g"
+    #echo "#####################################################################5"
+    #blkid | grepstuff "LABEL="
+
+
+##################################################################### notused
+grepstuff() { #streamfunctionasfileorcmd
+
+	local VALUE="$1"
+	local LINE=
+
+	awk -F "$VALUE" '{printf $2; printf "\n"}' | sed -e 's/"//g' | sed -e "s/\'//g" | awk '{print $1}'
+    #awk -F "$VALUE" '{printf $2; printf "\n"}' | sed -e 's/"//g' | sed -e "s/\'//g"
+    #sed -e 's/ .*$//'
+
+    #return 0
+
+
+    ####
+    #while read LINE; do
+	#echo $LINE | awk -F "$VALUE" '{printf $2}' | sed -e 's/"//g' | sed -e "s/\'//g"
+    #done
+    #####
+	#awk -F "$VALUE" '{printf $2}' | sed -e 's/"//g' | sed -e "s/\'//g"
+    ####
+
+
+    #| sed -e 's/"//g' | sed -e "s/\'//g"
+    #| sed -e 's/ .*$//'
+
+    #| sed -e 's/"//g' | sed -e "s/\'//g"
+	#awk -F "$VALUE" '{printf $2}' $FILE | sed -e 's/ .*$//'
+    #if ! -f
+		# if command -v $FILEpart1 then CMD=FILEall?
+
+	#awk -F "$VALUE" '{printf $2}' $FILE | sed -e 's/ .*$//'
+}
+
+
+#| sed -e 's/"//g' | sed -e "s/\'//g"
+#blkid | awk -F 'LABEL=' '{printf $2; printf "\n"}'
+#awk '{print $1; printf "\n"}' <<<$'foo bar\nspam egg'
+
+#blkid | grep -v 'TYPE="swap"' | \
+#    awk -F "LABEL=" '{printf $2; printf "\n"}' | sed -e 's/"//g' | sed -e "s/\'//g" | awk '{print $1}'
+
+    #echo "1"
+    #blkid | awk -F 'LABEL=' '{printf $2}' | sed -e 's/ .*$//'
+    #echo "2-?"
+	#blkid | awk -F 'LABEL=' '{printf $2; printf "\n"}' | sed -e 's/ .*$//'
+    #echo "3-stripscommastoolate"
+	#blkid | awk -F 'LABEL=' '{printf $2; printf "\n"}' | sed -e 's/"//g' | sed -e "s/\'//g"
+
+###nohandle" or newline
+#blkid | awk -F 'LABEL=' '{printf $2}' | sed -e 's/\//\n/g'
+#awk -F 'LABEL=' '{printf $2}' BblockidK | sed -e 's/\//\n/g'
+###
+#awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g'
+#awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g' | while read... grep isvalid=1 /boot/.../os.ini
+#nope awk -F 'LABEL=' '{printf $2}' ./BK | sed 's/ .*$/\n/g'
+
+#sameline?
+#awk -F 'ubi.mtd=' '{printf $2}' /proc/cmdline | sed -e 's/ .*$//'
+#grepstuff "ubi.mtd=" "file||command?"
+#####
+#awk -F "$VALUE" '{printf $2}' $FILE | sed -e 's/ .*$//'
+#awk -F "$VALUE" '{printf $2}' $(CMD) | sed -e 's/ .*$//'
+####
+
+
+#awk -F 'os_prefix=' '{printf $2}' /boot/config.txt | sed -e 's/\//\n/g'
 
 

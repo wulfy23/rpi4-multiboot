@@ -2,26 +2,18 @@
 
 
 
-    ################################################## multiboot (pre-beta)
-
-    
-    wget -O /bin/rpi-multiboot.sh https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/setup/rpi-multiboot.sh
-
-    rpi-multiboot.sh init
-    reboot
-
-    #check the partitions were created ok> blkid
-
-    https://raw.github.com/wulfy23/rpi4-multiboot/master/multiboot/current/openwrt/snapshot.tar.gz
-    rpi-multiboot.sh install /usbstick/snapshot.tar.gz os2
-
-    rpi-multiboot.sh toggle os2
-    reboot
+    ################################################## multiboot (pre-beta) NOT WORKING!!!!!!!!!!!!!!!!!!!
 
 
-    NOTE: very buggy beta stage... edit /boot/config.txt comment out all os_prefix= and reboot to return to baseOS
+        NOTE: THIS FEATURE IS LIKELY TO BE UNFINISHED / QUITE UNSTABLE for at least a MONTH
 
 
+        Only ADVANCED USERS who;
+        
+            -have a spare MMC card to test on
+            -know how to backup/restore their conf
+            -are familiar with linux and editing files and rpi boot file basics
+            -preferrably have a console connection
 
 
 
@@ -85,7 +77,7 @@
 
 
 
-        initial contraints:
+        initial contsraints:
             
             -each "multi>rootfs" partition is hardcoded
              at 1GB... although this is to streamline
@@ -107,12 +99,6 @@
 
 
 
-
-
-    
-
-
-
     ############################################ ignore below
     
     
@@ -121,27 +107,6 @@
         the addition of multiboot featureset has allowed
         for a one time sdcard rootfspartition extend
         operation...
-
-        this will allow you to utilise the full
-        space quotient of your sd;
-
-            i.e.: 900MB > 14GB
-
-
-        technically i'd only really advise such an
-        option for official releases / long term
-        installs of which you need that full
-        space and are unable to use extroot
-        ( i.e. all usb port are taken )
-
-
-        may need to
-        use -p on next sysupgrade to revert
-        back to the original layout
-        and re-extend ( not sure about this )
-
-
-
 
 
     MULTIBOOT(not)>RAMFSMODE: (draft)
@@ -158,10 +123,4 @@
 
 
 
-
-
-
-
-
-
-
+        
