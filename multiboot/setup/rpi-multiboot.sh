@@ -380,19 +380,110 @@ sleep ${dbgslp:-0}
 
 
 
+
     cp /boot/bcm2711-rpi-4-b.dtb "$OSbase/$OSdir/"
     cp /boot/c*.txt "$OSbase/$OSdir/"
     cp /boot/cmdline.txt "$OSbase/$OSdir/cmdline.txt.original"
 
 
 
+
+
+
     if [ ! -z "$OSinitramfs" ]; then
-	    echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir ramopt=partinit" > "$OSbase/$OSdir/cmdline.txt"
+
+        echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir ramopt=partinit" > "$OSbase/$OSdir/cmdline.txt"
+
+
+
+
+        echo "addtesting-nextos os0 > os1"; sleep 1
+        sed -i 's!$! nextos=os1!g' cmdline.txt "$OSbase/$OSdir/cmdline.txt"
+
+
+        echo "Create $OSbase/$OSdir/cmdline.txt.multi [for sysup repairs]"
+        cp "$OSbase/$OSdir/cmdline.txt" "$OSbase/$OSdir/cmdline.txt.multi"
+        #@@@ unsure if prefix config.txt is loaded/merged/ignored etc...?
+        echo "Create $OSbase/$OSdir/config.txt.multi [for sysup repairs]"
+        cp "$OSbase/$OSdir/config.txt" "$OSbase/$OSdir/config.txt.multi"
+
+
+
     else
 	    echo "$(cat /boot/cmdline.txt) os_prefix=$OSdir" > "$OSbase/$OSdir/cmdline.txt"
+
+
+        echo "cmdline.txt rootfs=${OSrootfspart} $OSbase/$OSdir/cmdline.txt"
+        sleep 2
+
+        sed -i "s!rootfs=/dev/mmcblk0p2!rootfs=${OSrootfspart}!g" "$OSbase/$OSdir/cmdline.txt"; sedRET=$?
+        echo "sedret: $sedRET"; sleep 1
+
+
+
+
+
+
+
+        #@@@inibasedALSOlikerootfsparts
+        case "$OSdir" in
+            *os1*)
+                echo "addtesting-nextos os1 > os2"; sleep 1
+                sed -i 's!$! nextos=os2!g' cmdline.txt "$OSbase/$OSdir/cmdline.txt"
+            ;;
+            *os2*)
+                echo "addtesting-nextos os2 > os1"; sleep 1
+                sed -i 's!$! nextos=os1!g' cmdline.txt "$OSbase/$OSdir/cmdline.txt"
+            ;;
+
+            *)
+                echo "nextos unknown for: $OSdir"; sleep 5
+            ;;
+        esac
+
+
+
+
+
     fi #echo a whole new line or sed #sed -i "s!root=/dev/mmcblk0p2!root=$rootfspart!g" $bootpart/cmdline.tx
 
 
+
+
+
+
+
+                #THISISFORSYSUPGRADEorBACKUPRESTOREetcCONFIG-CMDLINEopsREPAIRs
+                #THISISFORSYSUPGRADEorBACKUPRESTOREetcCONFIG-CMDLINEopsREPAIRs
+                #THISISFORSYSUPGRADEorBACKUPRESTOREetcCONFIG-CMDLINEopsREPAIRs
+                echo "Create $OSbase/$OSdir/cmdline.txt.multi [for sysup repairs]"
+                cp "$OSbase/$OSdir/cmdline.txt" "$OSbase/$OSdir/cmdline.txt.multi"
+                #@@@ unsure if prefix config.txt is loaded/merged/ignored etc...?
+                echo "Create $OSbase/$OSdir/config.txt.multi [for sysup repairs]"
+                cp "$OSbase/$OSdir/config.txt" "$OSbase/$OSdir/config.txt.multi"
+                #THISISFORSYSUPGRADEorBACKUPRESTOREetcCONFIG-CMDLINEopsREPAIRs
+                #THISISFORSYSUPGRADEorBACKUPRESTOREetcCONFIG-CMDLINEopsREPAIRs
+                #THISISFORSYSUPGRADEorBACKUPRESTOREetcCONFIG-CMDLINEopsREPAIRs
+                sleep 3
+
+
+#ADD sed -i 's!$! nextos=baseos!g' cmdline.txt
+#REMOVE sed -i 's! nextos=[a-z].*!!g' cmdline.txtT
+#"$OSbase/$OSdir/cmdline.txt"
+#MAIN was keeping in /boot/config.txt.osX for copy method... dont do for now or copy back after
+#######################################################
+#!!!DOTHISINinitbootOS</boot/config.txt.default
+#sdaXwipdef-man-editNpartNcp@toggleprevention
+#######################################################
+#cp /boot/config.txt.default /boot/config.txt.os3
+#echo "os_prefix=os3/" >> /boot/config.txt.os3
+#######################################################
+
+
+
+
+
+########################################################## NOTUSED!!!
 
 echU "Write default: $OSbase/$OSdir/os.ini"
 
@@ -405,6 +496,8 @@ Pbootpfx="$OSbase/$OSdir"
 ##############################unused
 Pkname="kernel8.img"
 EOF
+
+
 
 }
 
@@ -1382,19 +1475,31 @@ cp /boot/config.txt /boot/config.txt.alt #who knows... similar to last?
 ########################################## initramfs os99 = psuedo nativeOS... note:funcbelowretonnosdafailfriendly
 cp /boot/config.txt /boot/config.txt.os99 #psuedooff
 cp /boot/config.txt /boot/config.txt.default #initiallyoffbutcanbeswitchedtoyourpreferencefor-onetime-toggle-revertTOs echoALTs#
+
+
+
+#!!!CORRECTION copy back here or leave !!!DOTHISINinitbootOS</boot/config.txt.default @ osX root= DIFFERENT or notset properly
 ################################################################################################################################
-cp /boot/config.txt /boot/config.txt.os0; echo "os_prefix=os0/" >> /boot/config.txt.os0 #ramfs@kernelimg+cmdline root=/dev/ram[ign]
-cp /boot/config.txt /boot/config.txt.os1; echo "os_prefix=os1/" >> /boot/config.txt.os1 #slot1 kernel-cmdline-+mmcp3
-cp /boot/config.txt /boot/config.txt.os2; echo "os_prefix=os2/" >> /boot/config.txt.os2
-cp /boot/config.txt /boot/config.txt.os3; echo "os_prefix=os3/" >> /boot/config.txt.os3 #sdaXwipdef-man-editNpartNcp@toggleprevention
+#cp /boot/config.txt /boot/config.txt.os0; echo "os_prefix=os0/" >> /boot/config.txt.os0 #ramfs@kernelimg+cmdline root=/dev/ram[ign]
+#cp /boot/config.txt /boot/config.txt.os1; echo "os_prefix=os1/" >> /boot/config.txt.os1 #slot1 kernel-cmdline-+mmcp3
+#cp /boot/config.txt /boot/config.txt.os2; echo "os_prefix=os2/" >> /boot/config.txt.os2
+#cp /boot/config.txt /boot/config.txt.os3; echo "os_prefix=os3/" >> /boot/config.txt.os3 #sdaXwipdef-man-editNpartNcp@toggleprevention
 
 
+
+
+
+    #@@@ source multiboot.ini or similar for rootfs variable per osX!!!!!!!!!!!!!!!!!!!!!!!!!
+    #@@@ source multiboot.ini or similar for rootfs variable per osX!!!!!!!!!!!!!!!!!!!!!!!!!
+    #@@@ source multiboot.ini or similar for rootfs variable per osX!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	#99isoff NOTE: if 2 = file > we copy instead of kernel
     initbootOS "os0" "$RAMFSout"
     initbootOS "os1" "/dev/mmcblk0p3"
     initbootOS "os2" "/dev/mmcblk0p4"
     initbootOS "os3" "$sdROOTFS" #ASKFIRST@>conditional?<ini-installed_os? #sdROOTFS="/dev/sda2"
+
+
 
 
 #set +x
