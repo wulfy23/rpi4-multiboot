@@ -312,7 +312,11 @@ curlgitfile() { FN="curlgitfile"
     local gitFILE="${1}"; local gitFILEo="${2}"; local gitFILEn=$(basename $gitFILE) #for error 404 name
     if curl -s -L "${gitFILE}" 1>$gitFILEo; then
         if [ "$(du -c ${gitFILEo} | head -n 1 | tr -s '\t' ' ' | cut -d' ' -f1)" -lt 300 ]; then #404 in ramfs!
-            if cat ${gitFILEo} | grep -q '404: Not Found'; then
+
+            if cat ${gitFILEo} | grep -q '/bin/sh'; then
+                return 0
+
+            elif cat ${gitFILEo} | grep -q '404: Not Found'; then
                 dlISSUES="non-existent-file:$gitFILEn"
                 ISSUES="${ISSUES} non-existent-file:$gitFILEn"
                 echU "$FN> ${gitFILE}@${gitFILEo} 404 > rm $dlISSUES"
@@ -541,14 +545,36 @@ usage() {
 cat <<EOF
 
     $(basename $0) [init]                           #setup local files dirs and initial parameters
+                                                    #reboots, partitions and brings you back in os1
 
-    $(basename $0) [refresh]                        #download the latest suppl files
 
-    $(basename $0) install r14419-23-mwan3.tar.gz os2 [conf=export|none]
-    $(basename $0) install http://r14419-23-mwan3.tar.gz os2 enter conf
-        $LATESTIMG os2
+    $(basename $0) [refresh]                        #download the latest suppl files ( update )
 
-    $(basename $0) info                             #various state / installed os info
+
+    $(basename $0) info                             #wip- various state / installed os info
+
+
+
+
+    LIMITATIONS:
+
+        Currently configs are saved every flash / toggle... anything else ( -n / upload )
+        is untested and to be considered not working.
+
+        Syncing these supporting files is a wip... you may need to run getfiles / refresh
+        in newly flashed os...
+
+        Unless something goes wrong with partitioning... the baseos ( original ) remains
+        untouched... and can be reverted to... ( but not encouraged -> often ) due to
+        complexities of config syncing and baseos operations likely zapping multi
+        data or settings.
+
+
+
+
+    ############################ not tested with new format ( toggle will occur on flash )
+    ### tba - failure detection / auto-toggle back... you'd need to edit config.txt on a pc
+    ### for now should a critical error occur...
 
     $(basename $0) [toggle] [slotN||off]            #switch between (next)boot osNUM
 
@@ -560,6 +586,15 @@ cat <<EOF
                     #!@ENTER... (~default@topvar<-z=stay||current)
 
     --help|-h|help
+
+
+    ############################# old format tar special images only... use sysupgrade ( after init ) with regular images
+    ############################# for now, sysupgrade only supports multi<>multi flashing...
+
+    $(basename $0) install r14419-23-mwan3.tar.gz os2 [conf=export|none]
+    $(basename $0) install http://r14419-23-mwan3.tar.gz os2 enter conf
+        $LATESTIMG os2
+
 
 EOF
 
@@ -650,7 +685,13 @@ if [ -f /boot/multiboot.ini ]; then #DEBUG=1
     . /boot/multiboot.ini
 else
     echU "multiboot.ini [nope] @ VANILLA=1 [wip]"
+
+
+
     #VANILLA=1 #OFF@0925>unpolated->fresh-os@info
+    VANILLA=1 #BACKON@-> init wont start if not vanilla -> echo something there on 'init'
+
+
 fi #VANILLA@initsACTIONcaseexit #@@@~if VANILLA &&|| POPULATE >>> INSTALLSLOT="os1 os2"
 
 
@@ -699,6 +740,15 @@ case "$sACTION" in
             DOINSTALL=1
             #@@@wasntshifted
             shift 1
+
+
+            echo "THIS-FEATURE-IS-NOT_AVAILABLEFROMTHIS-SCRIPT"
+            echo "use $0 init"
+            echo "then after reboot"
+            echo "use> sysupgrade <IMAGE>"
+
+            exit 0
+
 
             echo "DBG-CASE@install)sACTION:$sACTION ${*}"
             echU "DBG-CASE@install)sACTION:$sACTION ${*}"
@@ -817,6 +867,12 @@ esac
     ;;
 
     init) DOINIT=1 #notusedyet->@skipsections-wip
+
+
+        #WAYTOOEARLY workaround -> on initsuccess
+        #echo 'init=1' >> /boot/multiboot.ini
+
+
         if [ -z "$VANILLA" ]; then
             echo "VANILLA!=1 (/boot/multiboot.ini found)" #REPAIRMEOFF
             if [ "$mmcpartcount" -ne 2 ]; then echo "mmcpartcount: $mmcpartcount != 2"; fi
@@ -833,6 +889,9 @@ esac
 
         shift 1 #echU "SHIFT2 dbg-LEFTOVER-params-init-parse1-end[$#]: ${*}"; sleep 3
     ;;
+
+
+
 
     ################################################# v1 IMPORTS
 
@@ -1002,7 +1061,18 @@ if [ ! -z "$gRSCR" ]; then #STANDALONE KEEPING AS SEPERATE BLOCK @> DLPHASE #if 
         fails "ramfsdl..."
     else
         echo "ramfs: $gRAMFS > $RAMFSout [ok]"; #echU "ramfs: $gRAMFS > $RAMFSout [ok]"
+        echo "$RAMFSout > /boot/os0/kernel8.img"
+        cp $RAMFSout /boot/os0/kernel8.img
     fi
+
+
+    #set -x df -lt > if bin/sh
+    if ! curlgitfile "$gRbasep/$GmbSUB/setup/rpi-multiboot.sh" "/bin/rpi-multiboot.sh"; then
+        fails "failed-dl: $gRbasep/$GmbSUB/setup/rpi-multiboot.sh"
+    else
+        echo "$gRbasep/$GmbSUB/setup/rpi-multiboot.sh > /bin/rpi-multiboot.sh"
+    fi
+
 
 fi
 
@@ -1570,6 +1640,10 @@ cp /boot/config.txt /boot/config.txt.default #initiallyoffbutcanbeswitchedtoyour
     sleep 6
     reboot
 
+
+
+    #>>> > /boot/multiboot-init.sh
+    #echo 'init=1' >> /boot/multiboot.ini
 
 
 fi
@@ -2304,9 +2378,9 @@ if [ ! -z "$DOINFO" ]; then #DOINFO=1
     #osPFXsetCNT=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix' | wc -l)
     if [ "$osPFXsetCNT" -eq 1 ]; then
 
-        cursetpfx=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix')
+        cursetpfx=$(cat /boot/config.txt 2>/dev/null | grep '^os_prefix' | sed 's!\/!!g')
         if ! grep -q "$cursetpfx" /proc/cmdline; then
-            echo "$cursetpfx [reboot-pending]"
+            echo "$cursetpfx [reboot-pending] $(grep os_prefix /proc/cmdline)"
         else
             echo "$cursetpfx [current]"
         fi
