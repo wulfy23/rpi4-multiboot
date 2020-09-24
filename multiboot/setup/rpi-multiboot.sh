@@ -1629,9 +1629,10 @@ if [ ! -z "$DOINIT" ]; then ####################################################
     	#if [ "$BdISKnumparts" -ne 2 ]; then echo "bootdisk: $BdISK($BdISKnumparts) partitioned already" && exit 0; fi
 	if [ -f /boot/.initialize ]; then echo "reboot to initialize or initialize failed" && cat /boot/.initialize && exit 0; fi
 
-	echo "skip gitdlcorefiles"
-	sleep 2
-	#gitdlcorefiles #moved here from inline above as function as used by "refresh" also #testfor $RAMFSout
+
+
+	#echo "skip gitdlcorefiles"; sleep 2
+	gitdlcorefiles #moved here from inline above as function as used by "refresh" also #testfor $RAMFSout
 
 
 	#@@@ source multiboot.ini or similar for rootfs variable per osX!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2250,7 +2251,7 @@ done
 
 #DEBUG=1
 
-    
+
 
 
 
